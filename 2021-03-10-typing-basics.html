@@ -1,0 +1,1773 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <title>Typing Basics</title>
+
+        <link rel="stylesheet" href="dist/reset.css">
+        <link rel="stylesheet" href="dist/reveal.css">
+        <link rel="stylesheet" href="dist/theme/black.css" id="theme">
+
+        <!-- Theme used for syntax highlighted code -->
+        <link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+
+        <style type="text/css">
+         .reveal .slides p, .reveal .slides blockquote { text-align: left; }
+         .reveal .slides ol, .reveal .slides dl, .reveal ul { display: block; }
+         .reveal .slides tt { font-family: monospace; font-size: 90%; }
+        </style>
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <!-- -------------------------------------------------------------------------------- -->
+                <section data-markdown>
+                    <textarea data-template>
+# Typing Basics
+                    </textarea>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <h2>SW Engineering Economics</h2>
+                    <blockquote class="fragment fade-up">
+                        A good programming language doesn't make it easy to write correct programs.
+                        <spane class="fragment fade-up">It makes it hard to write incorrect ones. (Jon Fairbairn)</span>
+                    </blockquote>
+                    <p class="fragment fade-up">
+                        The same holds for many related things: Libraries, frameworks, type systems, etc.
+                    </p>
+                    <p class="fragment fade-up">
+                        Resaon: SW is <em>written</em> only once, but read, debugged, extended, and refactored dozens of times.
+                    </p>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <h2>Goals</h2>
+                    <ul>
+                        <li class="fragment fade-up">Understand why typing is good for mental health</li>
+                        <li class="fragment fade-up">Get a language-independent idea of the concepts</li>
+                        <li class="fragment fade-up">Catch a glimpse of some more advanced topics</li>
+                        <li class="fragment fade-up">Some practical hints</li>
+                        <li class="fragment fade-up">Finally: See some Haskell! 🤭</li>
+                    </ul>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section data-markdown data-background="images/prepare_for_winter.gif">
+                    <textarea data-template>
+## Hell Freezes Over
+
+Adding typing even to previously untyped scripting languages is a common trend:
+
+* Scheme (1975) ⇒ Typed Scheme (2008)
+* Python (1990) ⇒ mypy (2012, Dropbox)
+* JavaScript (1995) ⇒ TypeScript (2012, Microsoft)
+* PHP (1995) ⇒ Hack (2014, Facebook)
+* Clojure (2007) ⇒ Typed Clojure (2012)
+                    </textarea>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <h2>Why is typing good for me?</h2>
+                    <ul>
+                        <li class="fragment fade-up">It helps to catch errors early: “If it compiles, it runs.”</li>
+                        <li class="fragment fade-up">It covers <em>all</em> of the code, not just the tested part.</li>
+                        <li class="fragment fade-up">Testing doesn't really scale.</li>
+                        <li class="fragment fade-up">Testing doesn't <em>prove</em> that your code is correct.</li>
+                        <li class="fragment fade-up">Equally important: Checked documentation!</li>
+                        <li class="fragment fade-up">Less important: Better code generation<//li>
+                    </ul>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Various Degrees of Typing</h2>
+                        <ul>
+                            <li class="fragment fade-up">
+                                Blindingly obvious (Haskell's <tt>System.IO</tt> module):
+	                              <pre><code data-trim class="haskell">
+openFile ∷ FilePath → IOMode → IO Handle
+                                </code></pre>
+                            </li>
+                            <li class="fragment fade-up">
+                                Less obvious (IEEE Std 1003.1™-2017 a.k.a. POSIX):
+	                              <pre><code data-trim class="c">
+int open(const char *, int, ...);
+                                </code></pre>
+                            </li>
+                            <li class="fragment fade-up">
+                                Totally arcane (Python library documentation):
+	                              <pre><code data-trim class="python">
+# 2 long pages of prose:
+# blah blah blah blah open blah blah blah file blah blah
+# blah mode blah blah blah example blah blah blah blah
+# blah note blah blah example blah blah buffering blah
+                                </code></pre>
+                            </li>
+                        </ul>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Quotes</h2>
+                        <blockquote class="fragment fade-up">
+                            Comments are a sign of our inability to express our
+                            thoughts in code. (Robert&nbsp;C.&nbsp;Martin a.k.a. Uncle&nbsp;Bob)
+                        </blockquote>
+                        <p class="fragment fade-up">So let's express more things
+                            code! Use types instead of naming conventions or
+                            comments, which are incorrect and/or outdated most of
+                            the time, anyway.</p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Quotes, part II</h2>
+                        <blockquote class="fragment fade-up">
+                            When people say “but most business logic bugs aren’t
+                            type errors,” I just want to show them how to make
+                            bugs into type errors. (Matt&nbsp;Parsons)
+                        </blockquote>
+                        <div class="fragment fade-up">
+                            <p>In other words, avoid code like:</p>
+	                          <pre><code data-trim class="python">
+def foo(id : int, what: str, why_not: Any, flag: bool):
+    # ...
+                            </code></pre>
+                            <p>Code smell: Primitive obsession</p>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Quotes, part III</h2>
+                        <blockquote class="fragment fade-up">
+                            While most programmers are concerned with
+                            getting more of their code to compile, we
+                            type-level programmers are trying our best to
+                            prevent code from compiling. (Sandy&nbsp;Maguire)
+                        </blockquote>
+                        <p class="fragment fade-up">
+                            Always remember: Types are there to <em>help</em>
+                            you, not to annoy you. When you are “fighting
+                            the type checker”, you are actually fighting
+                            your very own code.
+                        </p>
+                    </section>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section data-markdown>
+                        <textarea data-template>
+## Nomenclature
+                        </textarea>
+                    </section>
+                    <section>
+                        <h2>What is a type?</h2>
+                        <p class="fragment fade-up">Simple, but mostly sufficient view:</p>
+                        <ul>
+                            <li class="fragment fade-up">Typing: Naming things by its intended use</li>
+                            <li class="fragment fade-up">A type is just a set of values.</li>
+                            <li class="fragment fade-up">The type of a function is an abstract description of what the function does.</li>
+                        </ul>
+                        <div class="fragment fade-up">
+                            <p>Much more complicated stuff is possible, e.g.:</p>
+                            <ul>
+                                <li>Domain theory</li>
+                                <li>Category theory</li>
+                            </ul>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section data-markdown>
+                        <textarea data-template>
+## Confusing Language Terminology
+
+* Typed: Well-defined, old & established meaning from set theory, happens at compile time
+* Untyped: Only runtime values carry a type or not even those (Assembler, Forth)
+* Static ≈ Strong ≈ Typed (C++, Java, Haskell, OCaml)
+* Dynamic ≈ Weak ≈ Untyped (Python, JavaScript, PHP, Scheme)
+* Hybrids: C++ with RTTI, Java with Reflection
+                        </textarea>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Notation</h2>
+                        <div class="fragment fade-up">
+                            <p>Some Python examples:</p>
+	                          <pre><code data-trim class="python">
+_HOSTS: Dict[str, Any] = {}
+
+def _ensure_conn(user: Optional[UserType],
+                 force_authuser: Optional[UserId]) -> None:
+    # ...
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>Some Haskell examples:</p>
+	                          <pre><code data-trim class="haskell">
+pi ∷ Double
+pi = 3.1415926535
+
+answer = (41 ∷ Integer) + 1
+
+magnitude ∷ RealFloat a ⇒ Complex a → a
+magnitude c = ...
+                            </code></pre>
+                        </div>
+                    </section>
+                </section>
+                <section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Checking vs. Inference</h2>
+                        <ul>
+                            <li class="fragment fade-up">
+                                Type <em>checking</em> verifies your claims: Write down some types ⇒
+                                type checker confirms that your code fits.
+                            </li>
+                            <li class="fragment fade-up">
+                                Type <em>inference</em> figures out all
+                                involved types itself: Great! We don't need to write
+                                down all that stuff, but still get all the advantages of checking!
+                            </li>
+                            <li class="fragment fade-up">
+                                Hindley/Milner/Damas type system (60s to 80s) figures out the <em>most general</em> type and is complete.
+                            </li>
+                            <li class="fragment fade-up">
+                                Even with inference, writing down types can help the reader of your code, i.e. <em>YOU!</em>
+                            </li>
+                            <li class="fragment fade-up">
+                                You can write down more concrete types if wanted.
+                            </li>
+                        </ul>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section data-background="images/hindley_milner_meme.jpg" data-background-size="contain">
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Limits of Type Checking</h2>
+                        <div class="fragment fade-up">
+                            <p>Slightly frustrating theoretical result:</p>
+                            <blockquote>
+                                Rice's Theorem: All non-trivial, semantic properties of programs are undecidable.
+                            </blockquote>
+                        </div>
+                        <p class="fragment fade-up">
+                            But approximations are good enough in practice.
+                        </p>
+                        <p class="fragment fade-up">
+                            Nevertheless: There are <em>always</em> programs which don't go wrong,
+                            but are rejected by a type checker.
+                        </p>
+                        <p class="fragment fade-up">
+                            The alternatives are worse: Non-terminating checker, lying checker, ...
+                        </p>
+                    </section>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section data-markdown>
+                        <textarea data-template>
+## Algebraic data types
+                        </textarea>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section data-markdown>
+                        <textarea data-template>
+## Sum Types
+
+Other common names for these:
+
+* discriminated union
+* disjoint union
+* tagged union
+* enumeration (as a special case)
+
+Idea: Combine various types into a single one, but remember where a value came from.
+                        </textarea>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Some Sum Types</h2>
+                        <div class="fragment fade-up">
+                            <p>In Python:</p>
+	                          <pre><code data-trim class="python">
+class Bool(Enum):
+    FALSE = 0;  TRUE = 1
+Color = Enum('Color', 'RED GREEN BLUE')
+
+BoolOrColor = Union[Bool, Color]  # not really a new type
+AgeOrShoeSize = Union[int, int]   # not really tagged
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>In Haskell:</p>
+	                          <pre><code data-trim class="haskell">
+data Bool = False | True
+data Color = Red | Green | Blue
+data BoolOrColor = MkBool Bool | MkColor Color
+data AgeOrShoeSize = Age Int | ShoeSize Int
+data Maybe a = Nothing | Just a -- type constructor with args
+data Either a b = Left a | Right b -- *the* sum type
+foo = bar False (MkBool True) 4711 (Just 42)  -- example
+                            </code></pre>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>A Better Sum Type</h2>
+                        <div class="fragment fade-up">
+                            <p>A more type-safe variant of <tt>AgeOrShoeSize</tt>:</p>
+	                          <pre><code data-trim class="python">
+class AgeOrShoeSize:
+    pass
+
+class Age(AgeOrShoeSize):
+    def __init__(self, a: int):
+        self.a = a  # We can even add validation here...
+
+class ShoeSize(AgeOrShoeSize):
+    def __init__(self, s: int):
+        self.s = s  #  ... and here!
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            More verbose than <tt>Union[int, int]</tt>, but now we can distinguish
+                            <tt>42</tt>, <tt>Age(42)</tt>, and <tt>ShoeSize(42)</tt>!
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Cardinality of a Sum Type</h2>
+                        <p class="fragment fade-up">Scary words for a simple concept:</p>
+                        <ul>
+                            <li class="fragment fade-up">
+                                The cardinality of a type \(T\) (written as \(|T|\)) is the number of possible values in \(T\).
+                            </li class="fragment fade-up">
+                            <li class="fragment fade-up">
+                                If a sum type \(A\) consists of types \(B_1, B_2, \ldots\),
+                                its cardinality is \(|A| = \sum_{i=1}^n |B_i|\),
+                                hence <em>“sum”</em> type!
+                            </li>
+                            <li class="fragment fade-up">
+                                For our previous examples:
+                                \(|BoolOrColor| = |Bool| + |Color| = 2 + 3 = 5\)
+                                \(|Maybe\ a| = 1 + |a|\), e.g. \(|Maybe\ Color| = 4\)
+                            </li>
+                        </ul>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section data-markdown>
+                        <textarea data-template>
+## Product Types
+
+Other common names for these:
+
+* compound type
+* cartesian product
+* record
+* struct
+
+Idea: Combine various types into one all at once, keeping all parts separate.
+                        </textarea>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Some Product Types</h2>
+                        <div class="fragment fade-up">
+                            <p>In Python:</p>
+	                          <pre><code data-trim class="python">
+# Not really a new type, just our old (,,) friend
+Coord3D = Tuple[float, float, float]
+
+# At least the fields have a name now...
+NameAndAge = namedtuple('NameAndAge', 'name age')
+
+# Look, mom: Fields have a name *and* a type!
+class BoolAndColor(NamedTuple):
+    b: bool;  c: Color
+
+# A full-blown class, could even validate arguments
+class Pair:  # not the full story, more on this later...
+    def __init__(self, a, b):
+        self.a = a;  self.b = b
+                            </code></pre>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Some Product Types, part II</h2>
+                        <div class="fragment fade-up">
+                            <p>
+                                Note: Types created by <tt>namedtuple</tt> and <tt>NamedTuple</tt> are subclasses of <tt>tuple</tt>,
+                                leading to some obscurities:
+                            </p>
+	                          <pre><code data-trim class="python">
+bac = BoolAndColor(True, Color.RED)
+b = bac[0]          # This one looks easy, but...
+x = bac[funny(42)]  # ... what type does x have?
+
+for y in bac:
+   ...  # Even worse: y's type will change during looping!
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>In Haskell:</p>
+	                          <pre><code data-trim class="haskell">
+data Coord3D = Coord3D Float Float Float
+data BoolAndColor = BoolAndColor Bool Color
+data Pair a b = Pair a b  -- already built-in as (a, b)
+-- usage:
+f = g (Coord3D 1 2 3) (BoolAndColor True Red) (Pair 1 'a')
+                            </code></pre>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Cardinality Again</h2>
+                        <p class="fragment fade-up">
+                            If a product type \(A\) consists of types \(B_1, B_2, \ldots\),
+                            its cardinality is \(|A| = \prod_{i=1}^n |B_i|\),
+                            hence <em>“product”</em> type!
+                        </p>
+                        <p class="fragment fade-up">
+                            For our previous example: \(|BoolAndColor| = |Bool| \times |Color| = 2 \times 3 = 6\)
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Something is still missing...</h2>
+                        <p class="fragment fade-up">
+                            We have already seen <em>sum</em> types and <em>product</em> types, what might be missing?
+                            sum ⇒ product ⇒ ...?
+                        </p>
+                        <p class="fragment fade-up">
+                            Repeating addition gives you a product,
+                            and repeating multiplication gives you <em class="fragment fade-up">exponentiation.</em>
+                        </p>
+                        <p class="fragment fade-up">
+                            But what is an exponential type? A very scary name,
+                            but you have seen them in action before: Functions!
+                        </p>
+                        <p class="fragment fade-up">
+                            But what is the connection with exponentiation?
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>One more time: Cardinality</h2>
+                        <div class="fragment fade-up">
+                            <p>Consider total functions of the type:</p>
+	                          <pre><code data-trim class="python">
+def f(b: bool) -> Color:
+    # ...
+                            </code></pre>
+                            <p>How many of those can you write?</p>
+                        </div>
+                        <p class="fragment fade-up">
+                            You can map <tt>False</tt> to any of the 3 colors,
+                            the same holds for <tt>True</tt>, so there are \(3^2 = 9\) possible functions.
+                        </p>
+                        <p class="fragment fade-up">
+                            In general: \(|a \to b| = |b|^{|a|}\), hence <em>“exponential”</em> type!
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Putting the Pieces Together</h2>
+                        <p class="fragment fade-up">In general, an algebraic data type is a sum of products.</p>
+                        <div class="fragment fade-up">
+                            <p>In Haskell:</p>
+	                          <pre><code data-trim class="haskell">
+data Shape = Circle Coord2D Float
+           | Rectangle Coord2D Coord2D
+           | Polygon [Coord2D]
+           | ParametricCurve (Float → Coord2D)
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>In OO languages, you have to revert to subclassing:</p>
+	                          <pre><code data-trim class="python">
+class Shape:
+  pass
+
+class Circle(Shape):
+  def __init__(self, center: Coord2D, radius: float) -> None:
+        # ...
+                            </code></pre>
+                        </div>
+                    </section>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Deconstructing Values</h2>
+                        <p class="fragment fade-up">Constructing values for algebraic data types is easy:
+                            Call one of their constructors. 😲 But how can we get back their parts?
+                        </p>
+                        <p class="fragment fade-up">
+                            An elegant way is <em>pattern matching</em>, which mirrors the construction of values.
+                        </p>
+                        <div class="fragment fade-up">
+	                          <pre><code data-trim class="haskell">
+area :: Shape → Float
+area (Circle _ r) = pi * r * r
+area (Rectangle (Coord2D x1 y1) (Coord2D x2 y2)) =
+    abs (x1 - x2) * abs (y1 - y2)
+...
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            Can be checked for exhaustiveness and redundancies.
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Deconstructing Values II</h2>
+                        <p class="fragment fade-up">In OO languages you can use abstract methods:</p>
+                        <div class="fragment fade-up">
+	                          <pre><code data-trim class="python">
+class Shape(abc.ABC):
+  @abc.abstractmethod
+  def area(self) -> float: ...
+
+class Circle(Shape):
+  def area(self) -> float:
+    return math.pi * self.radius * self.radius
+
+class Rectangle(Shape):
+  def area(self) -> float:
+    return (abs(self.point1.x - self.point2.x) *
+            abs(self.point1.y - self.point2.y))
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">Pro: Keeps e.g. <tt>Circle</tt> stuff together.</p>
+                        <p class="fragment fade-up">Con: Tears <tt>area</tt> stuff apart.</p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Deconstructing Values III</h2>
+                        <p class="fragment fade-up">Another OO option: Type dispatch by hand</p>
+                        <div class="fragment fade-up">
+	                          <pre><code data-trim class="python">
+def area(s: Shape) -> float:
+    # s has type Shape here
+    if isinstance(s, Circle):  # Must be visible to mypy!
+        # s has type Circle in this branch
+        return math.pi * s.radius * s.radius
+    if isinstance(s, Rectangle):
+        # s has type Rectangle in this branch
+        return (abs(s.point1.x - s.point2.x) *
+                abs(s.point1.y - s.point2.y))
+    # ... aaaand s has type Shape again!
+    raise TypeError("D'oh! 💩")
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            Pros and cons are switched: Now the <tt>area</tt> stuff is kept together, but e.g. the <tt>Circle</tt> stuff is torn apart.
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Deconstructing Values IV</h2>
+                        <p class="fragment fade-up">
+                            For a variation of the first technique (via abstract methods), you can use the <em>visitor pattern</em>:
+                            Define the dispatching once and for all, so you can easily hook in functionality later.
+                        </p>
+                        <div class="fragment fade-up">
+                            <p>
+                                From Scott Meyer's <em>“My Most Important C++ Aha! Moments...Ever”</em>:
+                            </p>
+                            <blockquote>
+                                Visitor lets you define a new operation without changing the classes of the elements on which it operates.
+                            </blockquote>
+                        </div>
+                    </section>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Multi-Parameter Functions?</h2>
+                        <div>
+                            <p>
+                                <span style="background-image: url('images/Young_frege.jpg'); background-repeat: no-repeat; background-size: contain;">
+                                    <span style="visibility: hidden;">XX</span>
+                                </span>
+                                <span style="background-image: url('images/Schonfinkel.gif'); background-repeat: no-repeat; background-size: contain;">
+                                    <span style="visibility: hidden;">XX</span>
+                                </span>
+                                <span style="background-image: url('images/HaskellBCurry.jpg'); background-repeat: no-repeat; background-size: contain;">
+                                    <span style="visibility: hidden;">XX</span>
+                                </span>
+                                say: Unary functions are all we need!
+                            </p>
+                        </div>
+                        <p class="fragment fade-up">
+                            Idea: Instead of a n-ary function, use a unary one returning yet another (n-1)-ary function.
+                        </p>
+                        <div class="fragment fade-up">
+                            <p>In Python:</p>
+	                          <pre><code data-trim class="python">
+f = lambda x, y: x + y         # f(1, 2) ⇒ 3
+g = lambda x: lambda y: x + y  # g(1)(2) ⇒ 3
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>In Haskell:</p>
+	                          <pre><code data-trim class="haskell">
+f ∷ (Int, Int) → Int
+f = λ(x, y) → x + y   -- f (1, 2) ⇒ 3
+
+g ∷ Int → Int → Int   -- same as: Int → (Int → Int)
+g = λx → λy → x + y   -- g 1 2 ⇒ 3
+                            </code></pre>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Currying</h2>
+                        <p>Can we automatically convert <tt>f</tt> into <tt>g</tt> and vice versa?</p>
+                        <div class="fragment fade-up">
+                            <p>Yes, we can! In Python:</p>
+	                          <pre><code data-trim class="python">
+def curry(f):
+    return lambda x: lambda y: f(x, y)
+
+def uncurry(g):
+    return lambda x, y: g(x)(y)
+
+# curry(f)(1)(2)  ⇒ 3
+# uncurry(g)(1,2) ⇒ 3
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            i.e. the “uncurried” function <tt>f</tt> and the “curried” function <tt>g</tt> are isomorphic (“of equal shape”),
+                            they differ only superficially. Notation: <tt>f</tt> ≅ <tt>g</tt>
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Currying, part II</h2>
+                        <div class="fragment fade-up">
+                            <p>All functions are curried in Haskell, so you can e.g. shift the equals sign around:</p>
+	                          <pre><code data-trim class="haskell">
+f1 = λ(x, y) → x + y
+f2 (x, y) = x + y
+
+g1 = λx → λy → x + y
+g2 x = λy → x + y
+g3 x y = x + y
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>There is no need to add trailing parameters just for passing them on (η-conversion):</p>
+	                          <pre><code data-trim class="haskell">
+inc1 y = g 1 y
+inc2   = g 1
+                            </code></pre>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Partial Application</h2>
+                        <p class="fragment fade-up">
+                            <tt>inc2</tt> is an example of partial application, i.e. giving a function only some of its arguments.
+                        </p>
+                        <div class="fragment fade-up">
+                            <p>Very useful technique:</p>
+	                          <pre><code data-trim class="haskell">
+lookup ∷ [(String, Int)] -> String → Maybe Int
+lookup pairs key = ...
+
+socialIds ∷ [(String, Int)]
+socialIds = [("John Doe", 1234), ("Jane Doe", 5678)]
+
+getSocialId ∷ String → Maybe Int
+getSocialId = lookup socialIds
+                            </code></pre>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Partial Application, part II</h2>
+                        <p class="fragment fade-up">
+                            Because Python doesn't offer currying out of the box, you have to write the glue code for
+                            yourself or use the <tt>functools</tt> module (much better!).
+                        </p>
+                        <div class="fragment fade-up">
+	                          <pre><code data-trim class="python">
+from functools import partial
+sub = lambda x, y: x - y
+foo = partial(sub, 100)  # foo(3) ⇒ 97
+dec = partial(sub, y=1)  # dec(3) ⇒ 2
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            Similar helper for methods (<tt>partialmethod</tt>) plus much more: Caching, dispatching, ... Have a look!
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Partial Application, part III</h2>
+                        <p class="fragment fade-up">
+                            C++ has a general way to bind parameters via <em>placeholders</em>,
+                            partial application is just a special case.
+                        </p>
+                        <div class="fragment fade-up">
+	                          <pre><code data-trim class="cpp">
+#include &lt;iostream&gt;
+#include &lt;functional&gt;
+using namespace std::placeholders;
+
+bool gt(int x, int y) { return x &gt; y; }
+
+int main() {
+    auto gt42 = std::bind(gt, _1, 42);
+    auto lt42 = std::bind(gt, 42, _1);
+    auto lt   = std::bind(gt, _2, _1);
+    std::cout << gt42(3) << lt42(9) << lt(3, 4) << std::endl;
+    return 0;
+}
+
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            Same alternative as everywhere: Good ol' lambdas...
+                        </p>
+                    </section>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Type Isomorphisms</h2>
+                        <p class="fragment fade-up">
+                            We have already seen that curried and uncurried functions are effectively the same thing,
+                            with <tt>curry</tt> and <tt>uncurry</tt> converting between them.
+                        </p>
+                        <p class="fragment fade-up">
+                            Can we generalize this to other types <tt>s</tt> and <tt>t</tt>?
+                        </p>
+                        <div class="fragment fade-up">
+                            <p>Yes, we can! We need to find 2 functions with:</p>
+	                          <pre><code data-trim class="haskell">
+to   ∷ s → t
+from ∷ t → s
+id_s = from ∘ to  -- must be identity on s
+id_t = to ∘ from  -- must be identity on t
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            If this holds, <tt>s</tt> and <tt>t</tt> are isomorphic (<tt>s</tt> ≅ <tt>t</tt>).
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Isomorphism Example I</h2>
+                        <div class="fragment fade-up">
+                            <p>Show that the following types are isomorphic:</p>
+	                          <pre><code data-trim class="haskell">
+data AgeOrShoeSize = Age Int | ShoeSize Int
+data Foo = Foo Bool Int  -- effectively (Bool, Int)
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+	                          <pre><code data-trim class="haskell">
+to ∷ AgeOrShoeSize → Foo
+to (Age a) = Foo False a
+to (ShoeSize s) = Foo True s
+
+from ∷ Foo → AgeOrShoeSize
+from (Foo False a) = Age a
+from (Foo True s) = ShoeSize s
+                            </code></pre>
+                            <p>So <tt>AgeOrShoeSize</tt> ≅ <tt>Foo</tt>. Which one do you prefer?</p>
+                        </div>
+                        <p class="fragment fade-up">
+                            Fun fact: The type <tt>Int</tt> is not relevant, so we have just proved that <tt>a</tt> + <tt>a</tt> = 2 × <tt>a</tt>, but more on this later...
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Isomorphism Example II</h2>
+                        <div class="fragment fade-up">
+                            <p>Show that the following type and <tt>a</tt> are isomorphic:</p>
+	                          <pre><code data-trim class="haskell">
+data Bar a = Bar (() → a)
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+	                          <pre><code data-trim class="haskell">
+to ∷ Bar a → a
+to (Bar f) = f ()
+
+from ∷ a → Bar a
+from x = Bar (λ() → x)
+                            </code></pre>
+                            <p>
+                                So there is no distinction between a value and a (pure) program computing this value.
+                            </p>
+                        </div>
+                        <p class="fragment fade-up">
+                            Another fun fact: We have just proved that <tt>a<sup>1</sup></tt> = <tt>a</tt>.
+                        </p>
+                    </section>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Type Synonyms</h2>
+                        <p>Often we want a short notation for our existing types.</p>
+                        <div class="fragment fade-up">
+                            <p>“typedefs” and “type aliases” in C++ :</p>
+	                          <pre><code data-trim class="cpp">
+typedef int Age;  // old-skool for: using Age = int;
+using Names = std::vector&lt;std::string&gt;;
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>“Type aliases” in Python:</p>
+	                          <pre><code data-trim class="python">
+Permissions = Dict[str, int]
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>“Type synonyms” in Haskell :</p>
+	                          <pre><code data-trim class="haskell">
+type ShowS = String → String
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">Doesn't create new types, just a kind of macros.</p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Data Type Renamings, part I</h2>
+                        <p>
+                            Often a type synonym is not enough, so we really
+                            need to create a new type, but still keep the overhead low.
+                        </p>
+                        <div class="fragment fade-up">
+	                          <pre><code data-trim class="python">
+Age = NewType('Age', int) # effectively a 'subclass' of int
+                          # creates def Age(x: int): return x
+def to_str(a: Age) -> str: ...
+def from_str(s: str) -> Age: ...
+
+x = to_str(42)            # Error!
+y = to_str(Age(42))       # OK
+z = from_str('one') + 12  # OK, but questionable
+print(type(Age(42)))      # ⇒ &lt;type 'int'&gt;
+
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            Types constructed by <tt>NewType</tt> keep the underlying representation,
+                            they are just a marker for the type checker.
+                            Use at least this instead of type synonyms!
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Data Type Renamings, part II</h2>
+                        <p>Haskell's <tt>newtype</tt> creates a real, brand-new type with the same representation:</p>
+	                      <pre><code data-trim class="haskell">
+newtype Age = Age Int
+
+to_str ∷ Age → String
+to_str a = ...
+
+from_str ∷ String → Age
+from_str s = ...
+
+x = to_str 42            -- Error!
+y = to_str (Age 42)      -- OK
+z = from_str 'one' + 12  -- Error!
+                        </code></pre>
+                        <p class="fragment fade-up">
+                            If you want to lift some operations of the wrapped type (e.g. equality), you can
+                            use a <tt>deriving</tt> clause.
+                        </p>
+                    </section>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Polymorphism</h2>
+                        <ul>
+                            <li class="fragment fade-up">Literal translation: “of many shapes”</li>
+                            <li class="fragment fade-up">Various aspects of what this means regarding types</li>
+                            <li class="fragment fade-up">Various kinds of polymorphisms exist.</li>
+                            <li class="fragment fade-up">Each kind can be useful in its own right.</li>
+                            <li class="fragment fade-up">Different kinds of polymorphisms can be mixed.</li>
+                        </ul>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Ad Hoc Polymorphism</h2>
+                        <ul>
+                            <li class="fragment fade-up">Also known as “overloading”</li>
+                            <li class="fragment fade-up">Functions with the same name can do different things depending on the types of their arguments.</li>
+                            <li class="fragment fade-up">Featured in e.g. C++ and Java</li>
+                            <li class="fragment fade-up">Can be emulated in Python via <tt>instanceof</tt></li>
+                            <li class="fragment fade-up">Can be avoided/implemented via renamings</li>
+                        </ul>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Ad Hoc Polymorphism II</h2>
+                        <p class="fragment fade-up">
+                            In C++ overloading is resolved via the <em>parameters</em> and <tt>const</tt>-ness of a function, not via the return type.
+                        </p>
+                        <div class="fragment fade-up">
+	                          <pre><code data-trim class="cpp">
+struct Foo {
+    int bar(float x) { return 42; }
+    void bar(const char *c) { /* format hard disk >:-) */ }
+    const char *bar(float x) const { return "Hi!"; }
+};
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            All overloads should better be related semantically somehow, otherwise things get <em>really</em> confusing.
+                        </p>
+                        <p class="fragment fade-up">
+                            Overload resolution gets quite “interesting” with implicit conversions and multiple parameters...
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Ad Hoc Polymorphism III</h2>
+                        <p class="fragment fade-up">
+                            mypy offers a way to improve types of “overloads”:
+                        </p>
+                        <div class="fragment fade-up">
+	                          <pre><code data-trim class="python">
+@overload
+def bar(x: float) -> int: ...  # just for mypy, not runtime
+
+@overload
+def bar(x: str) -> None: ...   # just for mypy, too
+
+def bar(x: Union[float, str]) -> Union[int, None]:
+    if isinstance(x, float): return 42
+    if isinstance(x, str): return None
+    raise TypeError()
+
+i: int = bar(3.14)      # doesn't work without @overload
+n: None = bar('Hurz!')  # this neither
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">Avoid this: You can easily lie in the <tt>@overload</tt>s, and mypy will still be happy.
+                            Remember Rices's theorem!</p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Parametric Polymorphism</h2>
+                        <div class="fragment fade-up">
+                            <p>What is the most general type of <tt>swap</tt>?</p>
+                            <pre><code data-trim class="haskell">
+swap (x, y) = (y, x)
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>All of the following signatures would be OK:</p>
+                            <pre><code data-trim class="haskell">
+swap ∷ (Int, Bool) → (Bool, Int)
+swap ∷ (Char, Double) → (Double, Char)
+swap ∷ (Float → Bool, String) → (String, Float → Bool)
+-- etc. etc.
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">But none of these is really satisfying, we would like to state something more general...</p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Parametric Polymorphism II</h2>
+                        <p class="fragment fade-up">
+                            Observation: <tt>swap</tt> doesn't really care about the actual types of the first and second part of the pair.
+                        </p>
+                        <p class="fragment fade-up">
+                            It works for <em>all</em> types contained in the pair, but
+                            it doesn't only swap the values, it swaps the types, too.
+                        </p>
+                        <p class="fragment fade-up">
+                            Idea: Types can have parameters, just like functions:
+                        </p>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="haskell">
+swap ∷ (a, b) → (b, a)
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>The type variables are implicitly universally quantified:</p>
+                            <pre><code data-trim class="haskell">
+swap ∷ ∀a b. (a, b) → (b, a)
+                            </code></pre>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Parametric Polymorphism III</h2>
+                        <p>In Python: Same idea, but a bit more ceremony due to legacy/syntactical reasons:</p>
+                        <pre><code data-trim class="python">
+from typing import Generic, TypeVar
+
+A = TypeVar('A')
+B = TypeVar('B')
+
+class Pair(Generic[A, B]):
+    def __init__(self, fst: A, snd: B) -> None:
+        self.fst = fst
+        self.snd = snd
+
+def swap(p: Pair[A, B]) -> Pair[B, A]:
+    return Pair(p.snd, p.fst)
+                        </code></pre>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Parametric Polymorphism IV</h2>
+                        <p class="fragment fade-up">
+                            Same idea in Java, but type variables are more local:
+                        </p>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="java">
+class Pair&lt;A, B&gt; {
+   public A fst;  public B snd;
+   public Pair(A fst, B snd) {
+      this.fst = fst;  this.snd = snd;
+   }
+}
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="java">
+public class Main {
+   public static &lt;X, Y&gt; Pair&lt;Y, X&gt; swap(Pair&lt;X, Y&gt; p) {
+      return new Pair&lt;&gt;(p.snd, p.fst);
+   }
+
+   public static void main(String[] args) {
+      Pair&lt;Integer, Boolean&gt; p = swap(new Pair&lt;&gt;(true, 42));
+      System.out.println(p.fst);
+   }
+}
+                            </code></pre>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Parametric Polymorphism IV</h2>
+                        <p class="fragment fade-up">
+                            Remember: (Pure &amp; total) functions must work for <em>all</em> types parameter substitutions, not just for some.
+                        </p>
+                        <div class="fragment fade-up">
+                            <p>Implement <em>all</em> functions with the following types:</p>
+                            <pre><code data-trim class="haskell">
+f ∷  a → a
+g ∷  a → b → a
+h ∷  a → b
+                            </code></pre>
+                        </div>
+                        <div  class="fragment fade-up">
+                            <p>You have no real choice:</p>
+                            <pre><code data-trim class="haskell">
+f x = x    -- a.k.a. id
+g x y = x  -- a.k.a. const
+h x = ???  -- nope...
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            (More fun stuff in <em>“Theorems for free!”</em> by P. Wadler)
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Subtyping</h2>
+                        <div class="fragment fade-up">
+                            <p>Running example:</p>
+                            <pre><code data-trim class="python">
+class Animal:
+    def breed(self): pass
+
+class Pet(Animal):
+    def play(self): pass
+
+class Cat(Pet):
+    def purr(self): pass
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            <tt>Pet</tt> is a <em>subtype</em> of <tt>Animal</tt>, notation: <tt>Pet</tt> <tt>&lt;:</tt> <tt>Animal</tt>
+                        </p>
+                        <p class="fragment fade-up">
+                            Mnemonic: There are fewer pets than animals.
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Subtyping, part II</h2>
+                        <p class="fragment fade-up">
+                            <span style="background-image: url('images/Barbara_Liskov.jpg'); background-repeat: no-repeat; background-size: contain;">
+                                <span style="visibility: hidden;">XX</span>
+                            </span>
+                            says: “Use <em>behavioral</em> subtyping!”
+                        </p>
+                        <div class="fragment fade-up">
+                            <p>Liskov substitution principle (LSP), scary formulation:</p>
+                            <blockquote>
+                                Let ϕ(x) be a property provable about objects x of type T. Then ϕ(y) should be true for objects y of type S <tt><:</tt> T.
+                            </blockquote>
+                        </div>
+                        <p class="fragment fade-up">
+                            Class hierarchies are basically meaningless without it!
+                        </p>
+                        <p class="fragment fade-up">
+                            In other, simpler words: Do not use <em>implementation</em> hierarchies, use <em>conceptual</em> hierarchies.
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Subtyping, part III</h2>
+                        <p class="fragment fade-up">
+                            LSP in our running example:
+                        </p>
+                        <ul>
+                            <li class="fragment fade-up">Cats should be able to play and breed.</li>
+                            <li class="fragment fade-up">No funny <tt>NotImplementedError</tt>s</li>
+                            <li class="fragment fade-up">No different meanings for the methods</li>
+                        </ul>
+                        <p class="fragment fade-up">
+                            “Whenever you expect an animal or a pet, you should be happy with a cat.” 😽
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Row Polymorphism</h2>
+                        <p class="fragment fade-up">
+                            Basic idea: As long as something has all the fields and/or methods I expect, I'm happy with it!
+                        </p>
+                        <p class="fragment fade-up">
+                            Not many details here, just hinting at some topics:
+                        </p>
+
+                        <ul>
+                            <li class="fragment fade-up">Duck typing (dynamic, Python)</li>
+                            <li class="fragment fade-up">Structural typing (static, Python protocols, TypeScript)</li>
+                            <li class="fragment fade-up">C++ templates (old-skool, without concepts)
+                                <pre><code data-trim class="cpp">
+template &lt;typename T&gt;
+int foo(T f) { return f.bar(); }
+                                </code></pre>
+</li>
+                        </ul>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Python Protocols</h2>
+                        <p class="fragment fade-up">
+                            Python's mechanism for structural typing:
+                        </p>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+class Greeter(Protocol):
+    def sayHi(self) -> None: ...
+
+class Gangsta:
+    def sayHi(self) -> None: print("Yo wazzzzzzup, Bro?")
+
+class Bavarian:   # NOTE: A Bavarian is not a Gangsta!
+    def sayHi(self) -> None: print("Servus!")
+
+def meet(g: Greeter) -> None: g.sayHi()
+
+meet(Gangsta())   # OK
+meet(Bavarian())  # OK
+meet(42)          # ERROR, ints can't say hi...
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            Tons of predefined protocols: Iterable[T], Sized, ...
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Bounded Polymorphism</h2>
+                        <div class="fragment fade-up">
+                            <p>How can we type the following function,
+                                assuming that we don't want to have mixed types for <tt>x</tt> and <tt>y</tt>?
+                            </p>
+                            <pre><code data-trim class="python">
+def longer(x, y):
+    return x if len(x) >= len(y) else y
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>Fully parametric polymorphism doesn't work:</p>
+                            <pre><code data-trim class="python">
+T = TypeVar('T')
+
+def longer(x: T, y: T) -> T:  # Yay! "No mixing" is enforced.
+    return x if len(x) >= len(y) else y
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            Claim: <tt>longer</tt> will work for <em>all</em> types <tt>T</tt>, which is a lie.
+                            There are objects without a <tt>__len__</tt> method.
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Bounded Polymorphism II</h2>
+                        <div class="fragment fade-up">
+                            <p>Next attempt, using the <tt>Sized</tt> protocol:</p>
+                            <pre><code data-trim class="python">
+def longer(x: Sized, y: Sized) -> Sized:
+    return x if len(x) >= len(y) else y
+
+longer("abc", "de")  # returns Sized
+longer([1, 2], [3])  # returns Sized
+longer("fg", [4])    # Hmmm...
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">Not a good solution, either:</p>
+                        <ul>
+                            <li class="fragment fade-up">We somehow forget the type we put into <tt>longer</tt>.</li>
+                            <li class="fragment fade-up">We allow the mixing of types.</li>
+                        </ul>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Bounded Polymorphism III</h2>
+                        <div class="fragment fade-up">
+                            <p>Type bounds to the rescue!</p>
+                            <pre><code data-trim class="python">
+T = TypeVar('T', bound=Sized)  # a class works here, too
+
+def longer(x: T, y: T) -> T:
+    return x if len(x) >= len(y) else y
+
+longer("abc", "de")  # returns str
+longer([1, 2], [3])  # returns List[int]
+longer("fg", [4])    # mypy complains!
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">(PRO TIP: If confused, ask mypy via <tt>reveal_type()</tt>!)</p>
+                        <div class="fragment fade-up">
+                            <p>Type classes are a similar concept in Haskell:</p>
+                            <pre><code data-trim class="haskell">
+max ∷ Ord a ⇒ a → a → a
+max x y = if x >= y then x else y
+                            </code></pre>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Bounded Polymorphism IV</h2>
+                        <div class="fragment fade-up">
+                            <p>Bounded type parameters in Java:</p>
+                            <pre><code data-trim class="java">
+public class Main {
+   public static &lt;T extends Comparable&lt;T>> T max(T x, T y) {
+      return x.compareTo(y) >= 0 ? x : y;
+   }
+
+   public static void main(String[] args) {
+      System.out.println(max("foo", "bar")); /* ⇒ "foo" */
+      System.out.println(max(123, 456));     /* ⇒ 456   */
+      System.out.println(max("huh?", 789));  /* nope!   */
+   }
+}
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">In C++: Templates with concepts &amp; constraints</p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Value Restrictions</h2>
+                        <div class="fragment fade-up">
+                            <p>“Bounded polymorphism” with unrelated classes:</p>
+                            <pre><code data-trim class="python">
+AnyStr = TypeVar('AnyStr', str, bytes)
+
+def concat(x: AnyStr, y: AnyStr) -> AnyStr:
+    return x + y
+
+concat('a', 'b')       # OK, returns str
+concat(b'a', b'b')     # OK, returns bytes
+concat(1, 2)           # Error: neither str nor bytes
+concat('foo', b'bar')  # Error: mixed types
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>Compare this to:</p>
+                            <pre><code data-trim class="python">
+StrOrBytes = Union[str, bytes]
+def broken(x: StrOrBytes, y: StrOrBytes) -> StrOrBytes:
+    return x + y  # Error: "+" can' concatenate str and bytes
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">Value restrictions can't be mixed with <tt>bound=...</tt></p>
+                    </section>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section>
+                    <section>
+                        <h2>Variance</h2>
+                        <p class="fragment fade-up">
+                            Scary name for a basic question: What happens when parametric polymorphism and subtyping meet?
+                        </p>
+                        <p class="fragment fade-up">
+                            The LSP says: It's OK to pass an <tt>S</tt> when a <tt>T</tt> is expected and <tt>S <: T</tt> holds.
+                            (Remember the cats! 😺)
+                        </p>
+                        <p class="fragment fade-up">
+                            Now: Given a type <tt>Foo</tt> with a parameter, when is it OK to pass a <tt>Foo[S]</tt> when a <tt>Foo[T]</tt> is expected?
+                        </p>
+                        <p class="fragment fade-up">
+                            In other words: What is the relationship between <tt>Foo[S]</tt> and <tt>Foo[T]</tt> when <tt>S <: T</tt>?
+                        </p>
+                    </section>
+                    <section>
+                        <h2>Syntactic Excursion</h2>
+                        <div class="fragment fade-up">
+                            <p>Haskell's function type syntax is straightforward:</p>
+                            <pre><code data-trim class="haskell">
+type funny = Int → Bool → Float
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>Modern C++'s syntax is finally bearable:</p>
+                            <pre><code data-trim class="cpp">
+typedef float (*argl)(int, bool);               // 😱
+using funny = std::function&lt;float(int, bool)&gt;;  // 😎
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>Python functions are uncurried, so no surprises here:</p>
+                            <pre><code data-trim class="python">
+Funny = Callable[[int, bool], float]
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            Neither C++ nor Python let you reuse these synonyms for function definitions themselves ⇒ redundancy
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Covariance</h2>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+PetProducer = Callable[[], Pet]
+
+def usePP(pp: PetProducer) -> None:
+    pp().breed()
+    pp().play()
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+def produceAnimal() -> Animal: return Animal()
+def producePet() -> Pet: return Pet()
+def produceCat() -> Cat: return Cat()
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+usePP(produceAnimal)  # Error! Animals can't play.
+usePP(producePet)     # OK
+usePP(produceCat)     # OK
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>
+                                Formally: Functions are <em>covariant</em> in their return type:
+                            </p>
+                            <div>
+                                <tt>S <: T &nbsp;⇒&nbsp; (() → S) <: (() → T)</tt>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Contravariance</h2>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+PetConsumer = Callable[[Pet], None]
+
+def usePC(pc: PetConsumer) -> None:
+    pc(Pet())
+    pc(Cat())
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+def consumeAnimal(a: Animal) -> None: a.breed()
+def consumePet(p: Pet) -> None: p.play()
+def consumeCat(c: Cat) -> None: c.purr()
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+usePC(consumeAnimal)  # OK
+usePC(consumePet)     # OK
+usePC(consumeCat)     # Error! Pets can't purr.
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>
+                                So functions are <em>contravariant</em> in their argument type:
+                            </p>
+                            <div>
+                                <tt>S <: T &nbsp;⇒&nbsp; (S → ()) :> (T → ())</tt>
+                            <div>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <!-- Brilliant picture made by Andrey Tyukin, taken from https://stackoverflow.com/a/19739576 -->
+                    <section data-background="images/pecs_principle.png" data-background-size="contain">
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Invariance</h2>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+PetTransformer = Callable[[Pet], Pet]
+
+def usePetTransformer(pt: PetTransformer) -> None:
+    pt(Pet()).breed();  pt(Pet()).play()
+    pt(Cat()).breed();  pt(Cat()).play()
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+def transformAnimal(a: Animal) -> Animal: a.breed(); return a
+def transformPet(p: Pet) -> Pet: p.play();  return p
+def transformCat(c: Cat) -> Cat: c.purr();  return c
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+usePetTransformer(transformAnimal)# Error: Animals can't play
+usePetTransformer(transformPet)   # OK
+usePetTransformer(transformCat)   # Error: Pets can't purr.
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            If a type is used in an argument position and a return position, the function is <em>invariant</em> in this type.
+                            There is no subtyping relationship whatsoever.
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Containers &amp; Variance</h2>
+                        <p class="fragment fade-up">Containers are producers/consumers too:</p>
+                        <ul>
+                            <li class="fragment fade-up">Read-only containers are producers of values.</li>
+                            <li class="fragment fade-up">Write-only containers (buffers) are consumers.</li>
+                            <li class="fragment fade-up">Read/write containers are both.</li>
+                        </ul>
+                        <p class="fragment fade-up">All the variance results from functions apply here, too:</p>
+                        <ul>
+                            <li class="fragment fade-up">Read-only containers ⇒ covariant</li>
+                            <li class="fragment fade-up">Write-only containers (buffers) ⇒ contravariant </li>
+                            <li class="fragment fade-up">Read/write containers ⇒ invariant </li>
+                        </ul>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Containers &amp; Variance II</h2>
+                        <p class="fragment fade-up">Examples from the standard Python library:</p>
+                        <ul>
+                            <li class="fragment fade-up"><tt>Iterator[T]</tt>, <tt>Sequence[T]</tt>, and <tt>Set[T]</tt> are all read-only  ⇒ covariant in <tt>T</tt></li>
+                            <li class="fragment fade-up"><tt>Tuple[T1,T2]</tt> is read-only  ⇒ covariant in <tt>T1</tt>, <tt>T2</tt></li>
+                            <li class="fragment fade-up"><tt>MutableSequence[T]</tt>, <tt>List[T]</tt>, <tt>MutableSet[T]</tt> are all read/write  ⇒ invariant in <tt>T</tt></li>
+                            <li class="fragment fade-up"><tt>Mapping[K,V]</tt> is invariant in <tt>K</tt> and covariant in <tt>V</tt>.</li>
+                            <li class="fragment fade-up"><tt>MutableMapping[K,V]</tt> and <tt>Dict[K,V]</tt> are invariant in <tt>K</tt> and <tt>V</tt>.</li>
+                        </ul>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Containers &amp; Variance III</h2>
+                        <p class="fragment fade-up">
+                            Actually, we have seen all of this before, because you can view containers as a kind of functions.
+                        </p>
+                        <div class="fragment fade-up">
+                            <p>An extremely simple example, a one-element box:</p>
+                            <pre><code data-trim class="python">
+def makeBox(p: Pet) -> Tuple[PetProducer, PetConsumer]:
+    box = p
+    def put(v: Pet) -> None:
+        nonlocal box
+        box = v
+    return (lambda: box, put)
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+get, put = makeBox(Cat())
+get()       # ⇒ Cat
+put(Pet())
+get()       # ⇒ Pet
+                            </code></pre>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Unions &amp; Variance</h2>
+                        <div class="fragment fade-up">
+                            <p>Remember from logic: \(A \implies A \lor B\), so we have:</p>
+                            <div><tt>A = Union[A] <: Union[A,B] <: Union[A,B,C]</tt></div>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>Special case:</tt></p>
+                            <div><tt>A <: Optional[A] = Union[A,None]</tt></div>
+                        </div>
+                        <p class="fragment fade-up">The consequences are well-known:</p>
+                        <ul>
+                            <li class="fragment fade-up">If you claim to be able to handle an <tt>Optional[A]</tt>, you <em>must</em> handle <tt>None</tt> somehow.</li>
+                            <li class="fragment fade-up">If you claim to return an <tt>Optional[A]</tt>, returning an <tt>A</tt> is fine.</li>
+                        </ul>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Calculating Variance</h2>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+ConsumePetProducer = Callable[[Callable[[], Pet]], None] # 🤯
+# Haskell: type ConsumePetProducer = (() → Pet) → ()
+
+def useCPP(cpp: ConsumePetProducer) -> None:
+    cpp(producePet)
+    cpp(produceCat)
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+def useAP(ap: Callable[[], Animal]) -> None: ap().breed()
+def usePP(pp: Callable[[], Pet]) -> None: pp().play()
+def useCP(cp: Callable[[], Cat]) -> None: cp().purr()
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+useCPP(useAP)  # OK
+useCPP(usePP)  # OK
+useCPP(useCP)  # Error: Pets can't purr. 🤔
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">
+                            <tt>Pet</tt> is used in a contravariant position here, but why?
+                        </p>
+                        <p class="fragment fade-up">
+                            Elementary school math to the rescue!
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Calculating Variance II</h2>
+                        <p class="fragment fade-up">
+                            For a type \(a \rightarrow b\) we have seen that \(a\) is used in a contravariant position and \(b\) is used in a covariant one.
+                        </p>
+                        <div class="fragment fade-up">
+                            <p>Think about variance as a kind of “sign”:</p>
+                            <ul>
+                                <li>covariant positions = positive (+)</li>
+                                <li>contravariant positions = negative (-)</li>
+                            </ul>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>
+                                Then use the sign rules from elementary school:
+                            </p>
+                            <p>
+                                (+) × (+) = (+), (-) × (+) = (-), (+) × (-) = (-), (-) × (-) = (+)
+                            </p>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Calculating Variance III</h2>
+                        <div class="fragment fade-up">
+                            <p>Consider the function type:</p>
+                            <div>
+                            \(\underbrace{(\underbrace{a}_- \rightarrow \underbrace{b}_+)}_- \rightarrow \underbrace{c}_+\)
+                            </div>
+                        </div>
+                        <p class="fragment fade-up">
+                            So \(a\) and \(c\) are used in covariant positions, and \(b\) is used in a contravariant position.
+                        </p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Type Variables &amp; Variance</h2>
+                        <div class="fragment fade-up">
+                            <p>mypy ties variance to type variables, not positions:</p>
+                            <pre><code data-trim class="python">
+T_co = TypeVar('T_co', covariant=True)
+T_contra = TypeVar('T_contra', contravariant=True)
+T_inv = TypeVar('T_inv')
+                            </code></pre>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>As a consequence, generic classes are very inflexible:</p>
+                            <pre><code data-trim class="python">
+class Stack(Generic[T_inv]):
+    def __init__(self) -> None: self.items: List[T_inv] = []
+    def push(self, v: T_inv) -> None: self.items.append(v)
+    def pop(self) -> T_inv: return self.items.pop()
+    def empty(self) -> bool: return not self.items
+                            </code></pre>
+                            <p><tt>Stack</tt> can only be used in an invariant way! 😢</p>
+                        </div>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Type Variables &amp; Variance II</h2>
+                        <p class="fragment fade-up">
+                            Looking back at our box example, one <em>can</em> work around this mypy flaw, but it's verbose:
+                        </p>
+                        <div class="fragment fade-up">
+                            <pre><code data-trim class="python">
+class ReadableBox(abc.ABC, Generic[T_co]):
+    @abc.abstractmethod
+    def get(self) -> T_co: ...
+
+class WritableBox(abc.ABC, Generic[T_contra]):
+    @abc.abstractmethod
+    def put(self, v: T_contra) -> None: ...
+
+class MyBox(ReadableBox[T_inv], WritableBox[T_inv]):
+    def __init__(self, v: T_inv): self._v = v
+    def get(self) -> T_inv: return self._v
+    def put(self, v: T_inv) -> None: self._v = v
+                            </code></pre>
+                        </div>
+                        <p class="fragment fade-up">This effectively triples the number of needed classes.</p>
+                    </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Type Variables &amp; Variance III</h2>
+                        <p class="fragment fade-up">
+                            Java ties variance to the <em>use site</em>, which is much more flexible.
+                        </p>
+                        <div class="fragment fade-up">
+                            <p>A covariant example:</p>
+                            <pre><code data-trim class="java">
+ArrayList&lt;? extends Pet> pp;  // a Pet producer
+pp = new ArrayList&lt;Animal>(); // ERROR
+pp = new ArrayList&lt;Pet>();    // OK
+pp = new ArrayList&lt;Cat>();    // OK
+
+Animal a = pp.get(0);         // OK
+Pet p = pp.get(0);            // OK
+Cat c = pp.get(0);            // ERROR
+
+pp.add(new Animal());         // ERROR
+pp.add(new Pet());            // ERROR
+pp.add(new Cat());            // ERROR
+                            </code></pre>
+                        </div>
+                      </section>
+                    <!-- -------------------------------------------------------------------------------- -->
+                    <section>
+                        <h2>Type Variables &amp; Variance V</h2>
+                        <div class="fragment fade-up">
+                            <p>A contravariant example:</p>
+                            <pre><code data-trim class="java">
+ArrayList&lt;? super Pet> pc;     // a Pet consumer
+pc = new ArrayList&lt;Animal>();  // OK
+pc = new ArrayList&lt;Pet>();     // OK
+pc = new ArrayList&lt;Cat>();     // ERROR
+
+Animal a = pc.get(0);          // ERROR
+Pet p = pc.get(0);             // ERROR
+Cat c = pc.get(0);             // ERROR
+
+pc.add(new Animal());          // ERROR
+pc.add(new Pet());             // OK
+pc.add(new Cat());             // OK
+                            </code></pre>
+                        </div>
+                      </section>
+                      <!-- -------------------------------------------------------------------------------- -->
+                      <section>
+                          <h2>Type Variables &amp; Variance IV</h2>
+                          <div class="fragment fade-up">
+                              <p>Finally an invariant example:</p>
+                              <pre><code data-trim class="java">
+ArrayList&lt;Pet> ppc;             // a Pet producer/consumer
+ppc = new ArrayList&lt;Animal>();  // ERROR
+ppc = new ArrayList&lt;Pet>();     // OK
+ppc = new ArrayList&lt;Cat>();     // ERROR
+
+Animal a = ppc.get(0);          // OK
+Pet p = ppc.get(0);             // OK
+Cat c = ppc.get(0);             // ERROR
+
+ppc.add(new Animal());          // ERROR
+ppc.add(new Pet());             // OK
+ppc.add(new Cat());             // OK
+                              </code></pre>
+                          </div>
+                      </section>
+                      <!-- -------------------------------------------------------------------------------- -->
+                      <section>
+                          <h2>The PECS Principle</h2>
+                          <div class="fragment fade-up">
+                              <div>Producer extends</div>
+                              <img src="images/arnold_pecs.jpg" height="390px"/>
+                              <div>Consumer super</div>
+                          </div>
+                      </section>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section data-markdown>
+                    <textarea data-template>
+## Curry-Howard Isomorphism
+TODO
+                    </textarea>
+                </section>
+                <!-- -------------------------------------------------------------------------------- -->
+                <section data-markdown>
+                    <textarea data-template>
+## TODO: Concrete advice for Python
+* Avoid escape hatches like Any or cast at any (sic!) cost
+* Wrap untyped APIs
+* Parse, don’t validate
+* Don't use "wishful typing": e.g. discovery function
+                    </textarea>
+                </section>
+            </div>
+        </div>
+
+        <script src="dist/reveal.js"></script>
+        <script src="plugin/notes/notes.js"></script>
+        <script src="plugin/markdown/markdown.js"></script>
+        <script src="plugin/highlight/highlight.js"></script>
+        <script src="plugin/zoom/zoom.js"></script> <!-- Zoom in and out with Alt+click -->
+        <script src="plugin/math/math.js"></script> <!-- MathJax -->
+
+        <script>
+         // More info about initialization & config:
+         // - https://revealjs.com/initialization/
+         // - https://revealjs.com/config/
+         Reveal.initialize({
+             hash: true,
+             // Learn about plugins: https://revealjs.com/plugins/
+             plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealZoom, RevealMath ],
+             markdown: { // Options for marked, see https://marked.js.org/#/USING_ADVANCED.md#options
+                 smartLists: true,
+                         smartypants: true
+             }
+         });
+        </script>
+    </body>
+</html>
